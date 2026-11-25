@@ -15,8 +15,11 @@ build on a machine downloads that archive, checks its hash, and unpacks it into
 
 Each archive holds `bin/clang-23` and `bin/clang`, a link to it, and nothing else. A release
 build compiles freestanding C, which includes no header, and links as a debug build does, so
-it needs nothing more of LLVM. The Linux clang loads glibc 2.34 or later, libstdc++ and zlib,
-which every current distribution has; the macOS clang loads only the system's libraries.
+it needs nothing more of LLVM. The Linux clang loads zlib, glibc 2.34 or later, and the
+libstdc++ of GCC 12 or later (`GLIBCXX_3.4.30`). It doesn't run on systems with an older one of
+these, such as Ubuntu 20.04 and Debian 11, or on Alpine, whose C library is musl: there,
+`STILT_CC` names a clang of the machine for `stilt` to use. The macOS clang loads only the
+system's libraries.
 
 ## Where they come from
 
