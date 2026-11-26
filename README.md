@@ -9,11 +9,17 @@ build on a machine downloads that archive, checks its hash, and unpacks it into
 
 | Release | Host | Archive | SHA-256 |
 | --- | --- | --- | --- |
-| [clang 23.1.5](https://github.com/stilt-lang/stilt-toolchains/releases/tag/clang-23.1.5) | macOS, Apple silicon | `clang-23.1.5-aarch64-macos.tar.gz`, 63 MB | `07510d2b4d7ecfe381afd73256d6007f2285927f15fa49a0fdd28d3f24aef3e9` |
-| | Linux, x86-64 | `clang-23.1.5-x86_64-linux.tar.gz`, 95 MB | `008a14fc0261c04bb11ccac4f252be3814ea906d6f7b3ab24ca4b7fd5479fa40` |
-| | Linux, arm64 | `clang-23.1.5-aarch64-linux.tar.gz`, 123 MB | `791ed84a6864c9d0323491654e4edbc23c8656993e859a3bbabd6339fea9151f` |
+| [clang 22.1.8](https://github.com/stilt-lang/stilt-toolchains/releases/tag/clang-22.1.8) | macOS, Apple silicon | `clang-22.1.8-aarch64-macos.tar.gz`, 60 MB | `931abe51f03493b32544163f1e725321ed1c53aff219cd827c6d1c971dc0d773` |
+| | Linux, x86-64 | `clang-22.1.8-x86_64-linux.tar.gz`, 91 MB | `e2832f51ddcc77f726c082474374ee973041b382f04f95459b333d258ef5d7bf` |
+| | Linux, arm64 | `clang-22.1.8-aarch64-linux.tar.gz`, 118 MB | `71b0781b698a6379e6192da9d6d97f78bdd31b8b42d84390100b467434440588` |
 
-Each archive holds `bin/clang-23` and `bin/clang`, a link to it, and nothing else. A release
+Stilt 2027.1 names clang 22.1.8. The [clang 23.1.5](https://github.com/stilt-lang/stilt-toolchains/releases/tag/clang-23.1.5)
+archives stay published but no release of `stilt` names them: LLVM 23.1.0 to 23.1.5 fold
+`0.0f * (0.0f / d)` to `0.0f` when `d` comes out of a loop and may be zero, where the answer is
+NaN (compare [llvm/llvm-project#241500](https://github.com/llvm/llvm-project/issues/241500)), which
+breaks the promise that a release build means what the debug build means.
+
+Each archive holds `bin/clang-22` and `bin/clang`, a link to it, and nothing else. A release
 build compiles freestanding C, which includes no header, and links as a debug build does, so
 it needs nothing more of LLVM. The Linux clang loads zlib, glibc 2.34 or later, and the
 libstdc++ of GCC 12 or later (`GLIBCXX_3.4.30`). It doesn't run on systems with an older one of
@@ -23,29 +29,29 @@ system's libraries.
 
 ## Where they come from
 
-`bin/clang-23` is the file of the same name in LLVM's own release binaries, unchanged:
-`LLVM-23.1.5-macOS-ARM64.tar.zst`, `LLVM-23.1.5-Linux-X64.tar.zst` and `LLVM-23.1.5-Linux-ARM64.tar.zst` of the
-[llvmorg-23.1.5 release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-23.1.5).
+`bin/clang-22` is the file of the same name in LLVM's own release binaries, unchanged:
+`LLVM-22.1.8-macOS-ARM64.tar.xz`, `LLVM-22.1.8-Linux-X64.tar.xz` and `LLVM-22.1.8-Linux-ARM64.tar.xz` of the
+[llvmorg-22.1.8 release](https://github.com/llvm/llvm-project/releases/tag/llvmorg-22.1.8).
 Their build provenance was verified before repacking:
 
 ```sh
-gh attestation verify LLVM-23.1.5-macOS-ARM64.tar.zst --repo llvm/llvm-project \
-  --bundle LLVM-23.1.5-macOS-ARM64.tar.zst.jsonl
+gh attestation verify LLVM-22.1.8-macOS-ARM64.tar.xz --repo llvm/llvm-project \
+  --bundle LLVM-22.1.8-macOS-ARM64.tar.xz.jsonl
 ```
 
-which names LLVM's `release-binaries.yml` workflow at `refs/tags/llvmorg-23.1.5` as the
-builder. To check an archive against LLVM's, compare the hash of its `bin/clang-23` with the
+which names LLVM's `release-binaries.yml` workflow at `refs/tags/llvmorg-22.1.8` as the
+builder. To check an archive against LLVM's, compare the hash of its `bin/clang-22` with the
 same file of LLVM's tarball:
 
-| Host | SHA-256 of `bin/clang-23` |
+| Host | SHA-256 of `bin/clang-22` |
 | --- | --- |
-| aarch64-macos | `a22ab66d53cf70dfee8544eabdeb36f075bf942861cb8d59f98a3fadc7a65c26` |
-| x86_64-linux | `2033aa32d783adec2a3d30a5d9229b60d9a7594ad73e19e87c3fd2b5ed21a9c2` |
-| aarch64-linux | `5520f306dcff595b4e04a73ff8df1d332e3fd5d53040500295fc7778a363232a` |
+| aarch64-macos | `9a690e9e11d4774d63e95ed2ab90abd82889f949b0bb9db8208f7e18f278ea50` |
+| x86_64-linux | `31a40dc31f3c15a47aa119aa148f339bf363d8f61202ddbdacbd3f24b71ba113` |
+| aarch64-linux | `5e07dff5f5026f7cf09d49a68e04a8d27c662efe5fd5b63a2e569d65e0abc5cb` |
 
 ```sh
-zstd --long=30 -dc LLVM-23.1.5-macOS-ARM64.tar.zst \
-  | tar -xOf - LLVM-23.1.5-macOS-ARM64/bin/clang-23 | shasum -a 256
+xz -dc LLVM-22.1.8-macOS-ARM64.tar.xz \
+  | tar -xOf - LLVM-22.1.8-macOS-ARM64/bin/clang-22 | shasum -a 256
 ```
 
 The archives are gzip-compressed POSIX tars written deterministically, entries in path order
